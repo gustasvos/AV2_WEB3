@@ -15,13 +15,7 @@ public class AdicionadorLinkCliente implements AdicionadorLink<Cliente> {
 	@Override
 	public void adicionarLink(List<Cliente> lista) {
 		for (Cliente cliente : lista) {
-			long id = cliente.getId();
-			Link linkProprio = WebMvcLinkBuilder
-					.linkTo(WebMvcLinkBuilder
-							.methodOn(ClienteControle.class)
-							.obterCliente(id))
-					.withSelfRel();
-			cliente.add(linkProprio);
+			adicionarLink(cliente);
 		}
 	}
 
@@ -30,8 +24,15 @@ public class AdicionadorLinkCliente implements AdicionadorLink<Cliente> {
 		Link linkProprio = WebMvcLinkBuilder
 				.linkTo(WebMvcLinkBuilder
 						.methodOn(ClienteControle.class)
+						.obterCliente(objeto.getId()))
+				.withSelfRel();
+		objeto.add(linkProprio);
+
+		Link linkColecao = WebMvcLinkBuilder
+				.linkTo(WebMvcLinkBuilder
+						.methodOn(ClienteControle.class)
 						.obterClientes())
 				.withRel("clientes");
-		objeto.add(linkProprio);
+		objeto.add(linkColecao);
 	}
 }
