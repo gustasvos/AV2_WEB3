@@ -1,9 +1,11 @@
 package com.autobots.automanager.controles;
 
 import com.autobots.automanager.entidades.Endereco;
+import com.autobots.automanager.entidades.Endereco;
 import com.autobots.automanager.modelos.AdicionadorLinkEndereco;
 import com.autobots.automanager.modelos.EnderecoAtualizador;
 import com.autobots.automanager.repositorios.EnderecoRepositorio;
+import com.autobots.automanager.servicos.EnderecoServico;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
@@ -17,56 +19,30 @@ import java.util.List;
 public class EnderecoControle {
 
     @Autowired
-    private EnderecoRepositorio repositorio;
-    @Autowired
-    private AdicionadorLinkEndereco adicionadorLink;
+    private EnderecoServico servico;
 
     @GetMapping("/{id}")
     public ResponseEntity<Endereco> obterEndereco(@PathVariable long id) {
-        return repositorio.findById(id)
-                .map(endereco -> {
-                    adicionadorLink.adicionarLink(endereco);
-                    return ResponseEntity.ok(endereco);
-                })
-                .orElseGet(() -> ResponseEntity.<Endereco>notFound().build());
-//        
+        return servico.obterEndereco(id);
+//
     }
 
     @GetMapping
     public ResponseEntity<List<Endereco>> obterEnderecos() {
-        List<Endereco> enderecos = repositorio.findAll();
-        adicionadorLink.adicionarLink(enderecos);
-        return ResponseEntity.ok(enderecos);
+        return servico.obterEnderecos();
+//
     }
 
     @PostMapping
     public ResponseEntity<Endereco> cadastrarEndereco(@RequestBody Endereco endereco) {
-        endereco.setId(null);
-        Endereco salvo = repositorio.save(endereco);
-        adicionadorLink.adicionarLink(salvo);
-
-        URI location = WebMvcLinkBuilder
-                .linkTo(WebMvcLinkBuilder
-                        .methodOn(EnderecoControle.class)
-                        .obterEndereco(salvo.getId()))
-                .toUri();
-
-        return ResponseEntity.created(location).body(salvo);
+        return servico.cadastrarEndereco(endereco);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Endereco> atualizarEndereco(
             @PathVariable long id,
             @RequestBody Endereco atualizacao) {
-
-        return repositorio.findById(id)
-                .map(endereco -> {
-                    new EnderecoAtualizador().atualizar(endereco, atualizacao);
-                    Endereco salvo = repositorio.save(endereco);
-                    adicionadorLink.adicionarLink(salvo);
-                    return ResponseEntity.ok(salvo);
-                })
-                .orElseGet(() -> ResponseEntity.<Endereco>notFound().build());
+        return servico.atualizarEndereco(id, atualizacao);
     }
 
 }
